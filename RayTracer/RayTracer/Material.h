@@ -14,7 +14,33 @@ public:
 	Color getKa(){
 		return ka;
 	}
-
+	Color getKs(){
+		return ks;
+	}
+	Color getKd(){
+		return kd;
+	}
+	double getReflect(){
+		return reflect;
+	}
+	double getTrans(){
+		return trans;
+	}
+	double getGlossy(){
+		return glossy;
+	}
+	double getShiny(){
+		return shiny;
+	}
+	double getRefract(){
+		return refract;
+	}
+	char * getTexture(){
+		return texture;
+	}
+	int getId(){
+		return id;
+	}
 	Color ka;
 	Color kd;
 	Color ks;

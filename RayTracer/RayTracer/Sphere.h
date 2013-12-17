@@ -25,18 +25,21 @@ public:
 	t2 = ( -b - vecSqrt( ( b * b ) - a * c ) ) / a;
 		if( ( ( b * b ) - a * c ).c[2] >= 0 ){
 			if(t1.length()>t2.length()){
+				this->norm = (r.getOrig()+r.getDir()*t1)/radius-pos;
 				return t1;
 			}
+			this->norm = ((r.getOrig()+r.getDir()*t2)/radius-pos);
 			return t2;
 		}
 	return Vector3(0,0,0);
 	}
-	virtual Vector3 getNormal( Vector3 pt ){return Vector3(0,0,0);}
+	virtual Vector3 getNormal( Vector3 pt ){return norm;}
 	virtual int getMatid(){return matid;}
 private:
 	Vector3 pos;
 	float radius;
 	int matid;
+	Vector3 norm;
 	
 };
 #endif

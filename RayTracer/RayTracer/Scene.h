@@ -15,7 +15,6 @@ public:
 	Scene( objLoader obj ){
 		shapes = std::vector<Shape*>();
 		mats = std::vector<Material>();
-		
 		Vector3 camPos = toVector3(*obj.vertexList[ obj.camera->camera_pos_index]);
 		Vector3 camLook = toVector3(*obj.vertexList[ obj.camera->camera_look_point_index ]);
 		Vector3 camUp = toVector3(*obj.normalList[ obj.camera->camera_up_norm_index ]);
@@ -42,7 +41,6 @@ public:
 				Vector3 triPos1 = toVector3( *obj.vertexList[ triangles->vertex_index[0] ] ).normalize();
 				Vector3 triPos2 = toVector3( *obj.vertexList[ triangles->vertex_index[1] ] ).normalize(); 
 				Vector3 triPos3 = toVector3( *obj.vertexList[ triangles->vertex_index[2] ] ).normalize();
-							
 				int mid = triangles->material_index;
 				Triangle* t = new Triangle( triPos1, triPos2, triPos3 , mid);
 				shapes.push_back(t);

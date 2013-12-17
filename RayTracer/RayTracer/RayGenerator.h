@@ -20,8 +20,8 @@ public:
 		int index = 0;
 		for( unsigned x = 0; x < width; x++ ){
 			for( unsigned y = 0; y < height; y++ ){
-				float u = -(int)width / 2 + ( width * ( x + 0.5 ) ) / width;
-				float v = -(int)height / 2 + ( height * ( y + 0.5 ) ) / height;
+				float u = -(int)width / 2 + (( x + 0.5 ) );
+				float v = -(int)height / 2 + ( ( y + 0.5 ) ) ;
 				Vector3 dir = -50.0f*cam.w+u*cam.u + v*cam.v;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 				dir.normalize();
 				Ray pixelRay = Ray(dir, cam.position);
