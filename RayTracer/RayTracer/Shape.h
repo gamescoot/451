@@ -12,7 +12,7 @@ public:
 
 	virtual Vector3 intersect(Ray ray)=0;
 	virtual Vector3 getNormal(Vector3 pt)=0;
-
+	virtual int getMatid()=0;
 private:
 };
 #endif

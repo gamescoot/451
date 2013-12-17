@@ -65,6 +65,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GenVector.h" />
+    <ClInclude Include="Hitpoint.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="objLoader.h" />

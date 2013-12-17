@@ -11,7 +11,8 @@ public:
 	~Material()
 	{
 	}
-	Vector3 getKa(){
+	Color getKa(){
+		return ka;
 	}
 
 	Color ka;
@@ -23,6 +24,7 @@ public:
 	double shiny;
 	double refract;
 	char texture[500];
+	int id;
 };
 
 

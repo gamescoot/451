@@ -8,15 +8,24 @@ class Camera
 public:
 	Camera(){
 	}
-	Camera(Vector3 e1, Vector3 c1, Vector3 u1)
+	~Camera(){}
+	Camera(Vector3 pos, Vector3 lookPt, Vector3 up)
 	{
-		e=e1;
-		c=c1;
-		u=u1;
+		position = pos;
+		Vector3 look = (lookPt-position).normalize();
+
+		Vector3 w = (-look).normalize();
+		Vector3 u = up.cross(w).normalize();
+		Vector3 v = w.cross(-u).normalize();
+		this->u=u;
+		this->v=v;
+		this->w=w;
 	}
-	Vector3 e;
-	Vector3 c;
 	Vector3 u;
+	Vector3 v;
+	Vector3 w;
+	Vector3 position;
+	private:
 };
 	
 

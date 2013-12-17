@@ -8,9 +8,10 @@
 class Sphere : public Shape{
 
 public:
-	Sphere(Vector3 p, float rad){
+	Sphere(Vector3 p, float rad, int mid){
 		pos = p;
 		radius = rad;
+		matid=mid;
 	}
 	~Sphere(){}
 
@@ -31,9 +32,11 @@ public:
 	return Vector3(0,0,0);
 	}
 	virtual Vector3 getNormal( Vector3 pt ){return Vector3(0,0,0);}
-
+	virtual int getMatid(){return matid;}
 private:
 	Vector3 pos;
 	float radius;
+	int matid;
+	
 };
 #endif

@@ -23,6 +23,7 @@
 #endif
 
 template <int dimension, class T = v3float, int padding = 0>
+
 class GenVector
 {
 public:
@@ -412,9 +413,26 @@ static GenVector<dimension, T, padding> operator/(const T f, const GenVector<dim
 	return t;
 }
 
+
 typedef GenVector<2> Vector2;
 typedef GenVector<3> Vector3;
 typedef GenVector<4> Vector4;
 typedef GenVector<3, unsigned char> Color;
+Vector3 toVector3( obj_vector v ){
+	Vector3 newV;
+	float x = v.e[0];
+	float y = v.e[1];
+	float z = v.e[2];
+	newV = Vector3( x, y, z );
+	return newV;
+}
+Vector3 vecSqrt(Vector3 v){
+	Vector3 newV;
+	newV.c[0]=sqrt(v.c[0]);
+	newV.c[1]=sqrt(v.c[1]);
+	newV.c[2]=sqrt(v.c[2]);
+	return newV;
+}
+
 
 #endif

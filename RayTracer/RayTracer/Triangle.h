@@ -12,11 +12,12 @@ class Triangle : public Shape{
 
 public:
 
-	Triangle( Vector3 pos1, Vector3 pos2, Vector3 pos3 ){
+	Triangle( Vector3 pos1, Vector3 pos2, Vector3 pos3, int mid){
 	vertex1 = pos1;
 	vertex2 = pos2;
 	vertex3 = pos3;
 	norm = (vertex1-vertex2).cross(vertex2-vertex3).normalize();
+	matid=mid;
 	}	
 	~Triangle(){}
 
@@ -38,11 +39,13 @@ public:
 		return Vector3(0,0,0);
 	}
 	virtual Vector3 getNormal(Vector3 pt){ return norm; }
-
+	virtual int getMatid(){return matid;}
+	
 private:
 	Vector3 vertex1;
 	Vector3 vertex2;
 	Vector3 vertex3;
 	Vector3 norm;
+	int matid;
 };
 #endif
