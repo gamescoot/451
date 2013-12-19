@@ -16,42 +16,43 @@ public:
 	vertex1 = pos1;
 	vertex2 = pos2;
 	vertex3 = pos3;
-	norm = (vertex1-vertex3).cross(vertex2-vertex1).normalize();
 	matid=mid;
 	}	
 	~Triangle(){}
 
-	virtual Vector3 intersect( Ray r ){
-		Vector3 top = norm.dot(vertex1-r.getOrig());
-		Vector3 bottom = r.getDir().dot(norm);
-		Vector3 intersectionParam = top/bottom;
+	virtual float intersect( Ray r ){
+		Vector3 dir = r.getDir().normalize();
+		Vector3 orig = r.getOrig();
+		Vector3 norm = getNormal(Vector3(0,0,0));
+		float top = (vertex1-orig).dot(norm);
+		float bottom = dir.dot(norm);
+		float intersectionParam = top/bottom;
 
-		if(intersectionParam[0]<0){
-			return -1.0;
+		if(intersectionParam<0){
+			return -2.0;
 		}
 
-		Vector3 rayPoint = r.getOrig()+intersectionParam*r.getDir();
+		Vector3 rayPoint = orig+intersectionParam*dir;
 
-		Vector3 test1 = (vertex2-vertex1).cross(rayPoint-vertex1).dot(norm);
-		Vector3 test2 = (vertex3-vertex2).cross(rayPoint-vertex2).dot(norm);
-		Vector3 test3 = (vertex1-vertex3).cross(rayPoint-vertex3).dot(norm);
-		if( test1.c[0]>0){
-			if(test2.c[0]>0){
-				if(test3.c[0]>0){
+		float test1 = (vertex2-vertex1).cross(rayPoint-vertex1).dot(norm);
+		float test2 = (vertex3-vertex2).cross(rayPoint-vertex2).dot(norm);
+		float test3 = (vertex1-vertex3).cross(rayPoint-vertex3).dot(norm);
+		if( test1>0){
+			if(test2>0){
+				if(test3>0){
 					return intersectionParam;
 				}
 			}
 		}
-		return Vector3(0,0,0);
+		return -1;
 	}
-	virtual Vector3 getNormal(Vector3 pt){ return norm; }
+	virtual Vector3 getNormal(Vector3 p){return (vertex1-vertex3).cross(vertex2-vertex1).normalize(); }
 	virtual int getMatid(){return matid;}
 	
 private:
 	Vector3 vertex1;
 	Vector3 vertex2;
 	Vector3 vertex3;
-	Vector3 norm;
 	int matid;
 };
 #endif

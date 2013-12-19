@@ -12,13 +12,12 @@
 #include "Triangle.h"
 #include "Shape.h"
 #include "Hitpoint.h"
+#include <math.h>
 
 //#include "obj_parser.cpp"
 #define RES 100
-Vector3 vecSqrt(Vector3 v);
-int intersect( Vector3 pos, double radius, Ray r );
-int triIntersect( Vector3 a, Vector3 b, Vector3 c, Ray r , Vector3 n);
 Hitpoint getHitPoint(Ray r, Scene* s);
+Color getColor(Hitpoint hit, Scene s);
 void printVector(obj_vector *v)
 {
 	printf("%.2f,", v->e[0] );
@@ -28,61 +27,113 @@ void printVector(obj_vector *v)
 
 int main(int argc, char **argv)
 {
+	//Generate Framebuffer
+	Buffer b = Buffer(RES,RES);
 	RayGenerator generator;
 	Camera cam;
 	Ray r;
-	Buffer b = Buffer(RES,RES);
+	
 
-	//load test.obj
+	//compute camera Data
 	objLoader *objData = new objLoader();
 	objData->load("spheres.obj");
 	Scene s = Scene(*objData);
-
 	cam = s.cam;
+
+	//for each pixel
+	//generate rays for pixel
 	generator = RayGenerator(cam, RES, RES);
 	for(int y=0; y<RES; y++)
 	{
 		for(int x=0; x<RES; x++)
 		{
+			//for each ray
 			r = generator.getRay(x, y);
-			//Vector3 d = r.getDir()*255.0f;
-			//Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
-			b.at(x,y) = Color(0,0,0);
+			Vector3 d = r.getDir().normalize()*255.0;
+			//Get ray Color
+			Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
+			b.at(x,y) = c;
 
-			Hitpoint hit = getHitPoint(r,&s);
-				//printf("%i\n", intersect(spherePos, radius, r));
-			Vector3 pos = hit.getHit();
-			if(!(pos.c[0]==0&&pos.c[1]==0&&pos.c[2]==0)){
-				Material m = s.mats[hit.getMatid()];
-				Color ka = m.getKa();
-				Color ks = m.getKs();
-				Vector3 norm = hit.getNorm()*255.0f;
-				Color n = Color(abs(norm[0]), abs(norm[1]), abs(norm[2]));
-				b.at(x,y)=ka;
+			int amountShapes = s.shapes.size();
+
+			if(amountShapes>0){
+				Hitpoint hit = getHitPoint(r,&s);
+					//printf("%i\n", intersect(spherePos, radius, r));
+				int hitMaterial = hit.getMatid();
+				if(hitMaterial>=-1){
+					Material m = s.mats[hit.getMatid()];
+					Color ka = m.getKa();
+					//getRayColor()
+					//write Color to buffer
+					b.at(x,y)=getColor(hit,s);
+				}
 			}
 		}
 
 	}
-
+	//save image
 	simplePPM_write_ppm("rainboj.ppm", b.getWidth(), b.getHeight(), (unsigned char*)&b.at(0,0));
 }
 Hitpoint getHitPoint(Ray r, Scene* s){
 	std::vector<Shape *> shapes = (*s).shapes;
-	Hitpoint p = Hitpoint(shapes[0]->intersect(r), shapes[0]->getMatid(),shapes[0]->getNormal(shapes[0]->intersect(r)).normalize());
-	for( int sInd=0; sInd < shapes.size(); sInd++ ){
+	Hitpoint hit = Hitpoint(shapes[0]->intersect(r), shapes[0]->getMatid(), shapes[0]->getNormal(r.getOrig()+r.getDir()*shapes[0]->intersect(r)));
+	float t = hit.getHit();
+	for( int sInd=1; sInd < shapes.size(); sInd++ ){
 		Shape * currentShape = shapes[sInd];
-		Hitpoint hit = Hitpoint(currentShape->intersect(r), currentShape->getMatid(), (currentShape->getNormal(Vector3(0,0,0))));
-		if(p.getHit().c[0]>hit.getHit().c[0]&&Vector3(0,0,0).length()< hit.getHit().length()){
-			p = hit;
+		float newt = currentShape->intersect(r);
+		int newMatid = currentShape->getMatid();
+		Vector3 newNorm = currentShape->getNormal((r.getOrig()+r.getDir()*newt));
+		
+		Hitpoint newHit = Hitpoint(newt, newMatid, newNorm);
+
+		if( newt < t && newt > 0){
+			hit = newHit;
+			t = hit.getHit();
 		}
 	}
-	Vector3 pos = p.getHit();
-	if(!(pos.c[0]==0&&pos.c[1]==0&&pos.c[2]==0)){
-			return p;
+	if( t >= 0 && t<10000){
+			return hit;
 	}
-	return Hitpoint(Vector3(0,0,0), -1, Vector3(1,0,0));
+	return Hitpoint(-1, -2, Vector3(1,0,0));
 }
+Color getColor(Hitpoint hit, Scene s){
+	Material m = s.mats[hit.getMatid()];
+	Vector3 pixelColor = Vector3(0,0,0);
+	for(int i = 0; i< s.lightMats.size(); i++){
+		Material lmat = s.lightMats[i];
+		Vector3 lightVec = s.lights[i];
+		lightVec = (lightVec-(s.cam.position +hit.getHit()*(-s.cam.w))).normalize();
+		
+		float cosine = hit.getNorm().dot(lightVec);
+		Vector3 look = s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w)).normalize();
+		Vector3 reflect = 2*(lightVec.dot(hit.getNorm()))*hit.getNorm()-lightVec;
+		reflect=Vector3(pow(reflect[0], m.getShiny()), pow(reflect[1],m.getShiny()), pow(reflect[2],m.getShiny()));
+		float halfVector = (look).dot(reflect);
+		Vector3 ambientColor = lmat.getIa()*m.getIa();
+		Vector3 diffuseColor = lmat.getId()*m.getId()*cosine;
+		Vector3 specularColor = lmat.getIs()*m.getIs()*halfVector;
+		pixelColor = pixelColor +ambientColor+diffuseColor ;
+		
+		
+		Ray r = Ray(lightVec, s.cam.position+hit.getHit()*(-s.cam.w));
+		Hitpoint shadow = getHitPoint(r, &s);
+		if(shadow.getHit()>=0&&shadow.getHit()<10000){
+			pixelColor=pixelColor+specularColor;
+		}
+		Vector3 toBounce = (s.cam.position+hit.getHit()*(-s.cam.w))-s.cam.position;
+		Vector3 negNorm = -hit.getNorm();
+		Vector3 bounce = -2*(toBounce.dot(negNorm))*negNorm + toBounce;
 
-
-
-
+		Hitpoint reflection = getHitPoint(Ray(bounce,(s.cam.position+hit.getHit()*(-s.cam.w))), &s);
+		if(reflection.getHit()>=0&&reflection.getHit()<10000){
+			Material mmm = s.mats[hit.getMatid()];
+			pixelColor=(Vector3(1,1,1)-m.reflect)*pixelColor+mmm.getIa()*m.reflect;
+			}
+	}
+	float sceneSpecificScale = 10.0f;
+	//pixelColor = (pixelColor+m.getIa()).normalize()*sceneSpecificScale;
+	//pixelColor=m.ia+(hit.getNorm().dot(s.lights[1]-hit.getHit())*m.id*s.lightMats[1].getId()+m.is*s.lightMats[1].getIs()*hit.getNorm().dot(s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w))));
+	pixelColor=pixelColor*sceneSpecificScale;
+	Color charColor = Color(pixelColor[0],pixelColor[1],pixelColor[2]);
+	return charColor;
+}

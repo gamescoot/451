@@ -38,9 +38,21 @@ public:
 	char * getTexture(){
 		return texture;
 	}
-	int getId(){
+	int getIdentification(){
+		return ident;
+	}
+	Vector3 getIa(){
+		return ia;
+	}
+	Vector3 getId(){
 		return id;
 	}
+	Vector3 getIs(){
+		return is;
+	}
+	Vector3 ia;
+	Vector3 id;
+	Vector3 is;
 	Color ka;
 	Color kd;
 	Color ks;
@@ -50,7 +62,7 @@ public:
 	double shiny;
 	double refract;
 	char texture[500];
-	int id;
+	int ident;
 };
 
 

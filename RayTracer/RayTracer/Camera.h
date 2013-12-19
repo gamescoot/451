@@ -12,7 +12,7 @@ public:
 	Camera(Vector3 pos, Vector3 lookPt, Vector3 up)
 	{
 		position = pos;
-		Vector3 look = (lookPt-position).normalize();
+		Vector3 look = (lookPt-position);
 
 		Vector3 w = (-look).normalize();
 		Vector3 u = up.cross(w).normalize();
