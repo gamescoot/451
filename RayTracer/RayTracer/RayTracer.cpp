@@ -17,7 +17,7 @@
 //#include "obj_parser.cpp"
 #define RES 100
 Hitpoint getHitPoint(Ray r, Scene* s);
-Color getColor(Hitpoint hit, Scene s);
+Color getColor(Ray r, Scene s);
 void printVector(obj_vector *v)
 {
 	printf("%.2f,", v->e[0] );
@@ -49,25 +49,8 @@ int main(int argc, char **argv)
 		{
 			//for each ray
 			r = generator.getRay(x, y);
-			Vector3 d = r.getDir().normalize()*255.0;
-			//Get ray Color
-			Color c = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
-			b.at(x,y) = c;
-
-			int amountShapes = s.shapes.size();
-
-			if(amountShapes>0){
-				Hitpoint hit = getHitPoint(r,&s);
-					//printf("%i\n", intersect(spherePos, radius, r));
-				int hitMaterial = hit.getMatid();
-				if(hitMaterial>=-1){
-					Material m = s.mats[hit.getMatid()];
-					Color ka = m.getKa();
-					//getRayColor()
-					//write Color to buffer
-					b.at(x,y)=getColor(hit,s);
-				}
-			}
+			Color charColor = getColor(r,s);
+			b.at(x,y) = charColor;
 		}
 
 	}
@@ -96,44 +79,58 @@ Hitpoint getHitPoint(Ray r, Scene* s){
 	}
 	return Hitpoint(-1, -2, Vector3(1,0,0));
 }
-Color getColor(Hitpoint hit, Scene s){
-	Material m = s.mats[hit.getMatid()];
-	Vector3 pixelColor = Vector3(0,0,0);
-	for(int i = 0; i< s.lightMats.size(); i++){
-		Material lmat = s.lightMats[i];
-		Vector3 lightVec = s.lights[i];
-		lightVec = (lightVec-(s.cam.position +hit.getHit()*(-s.cam.w))).normalize();
-		
-		float cosine = hit.getNorm().dot(lightVec);
-		Vector3 look = s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w)).normalize();
-		Vector3 reflect = 2*(lightVec.dot(hit.getNorm()))*hit.getNorm()-lightVec;
-		reflect=Vector3(pow(reflect[0], m.getShiny()), pow(reflect[1],m.getShiny()), pow(reflect[2],m.getShiny()));
-		float halfVector = (look).dot(reflect);
-		Vector3 ambientColor = lmat.getIa()*m.getIa();
-		Vector3 diffuseColor = lmat.getId()*m.getId()*cosine;
-		Vector3 specularColor = lmat.getIs()*m.getIs()*halfVector;
-		pixelColor = pixelColor +ambientColor+diffuseColor ;
-		
-		
-		Ray r = Ray(lightVec, s.cam.position+hit.getHit()*(-s.cam.w));
-		Hitpoint shadow = getHitPoint(r, &s);
-		if(shadow.getHit()>=0&&shadow.getHit()<10000){
-			pixelColor=pixelColor+specularColor;
-		}
-		Vector3 toBounce = (s.cam.position+hit.getHit()*(-s.cam.w))-s.cam.position;
-		Vector3 negNorm = -hit.getNorm();
-		Vector3 bounce = -2*(toBounce.dot(negNorm))*negNorm + toBounce;
+Color getColor(Ray r, Scene s){
+	Vector3 d = r.getDir().normalize()*255.0;
+	//Get ray Color
+	Color charColor = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
 
-		Hitpoint reflection = getHitPoint(Ray(bounce,(s.cam.position+hit.getHit()*(-s.cam.w))), &s);
-		if(reflection.getHit()>=0&&reflection.getHit()<10000){
-			Material mmm = s.mats[hit.getMatid()];
-			pixelColor=(Vector3(1,1,1)-m.reflect)*pixelColor+mmm.getIa()*m.reflect;
+	int amountShapes = s.shapes.size();
+
+	if(amountShapes>0){
+		Hitpoint hit = getHitPoint(r,&s);
+		int hitMaterial = hit.getMatid();
+
+		if(hitMaterial>=-1){
+			Material m = s.mats[hit.getMatid()];
+			//getRayColor()
+			//write Color to buffer
+			Vector3 pixelColor = Vector3(0,0,0);
+			for(int i = 0; i< s.lightMats.size(); i++){
+				Material lmat = s.lightMats[i];
+				Vector3 lightVec = s.lights[i];
+				lightVec = (lightVec-(s.cam.position +hit.getHit()*(-s.cam.w))).normalize();
+		
+				float cosine = hit.getNorm().dot(lightVec);
+				Vector3 look = s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w)).normalize();
+				Vector3 reflect = 2*(lightVec.dot(hit.getNorm()))*hit.getNorm()-lightVec;
+				reflect=Vector3(pow(reflect[0], m.getShiny()), pow(reflect[1],m.getShiny()), pow(reflect[2],m.getShiny()));
+				float halfVector = (look).dot(reflect);
+				Vector3 ambientColor = lmat.getIa()*m.getIa();
+				Vector3 diffuseColor = lmat.getId()*m.getId()*cosine;
+				Vector3 specularColor = lmat.getIs()*m.getIs()*halfVector;
+				pixelColor = pixelColor +ambientColor+diffuseColor ;
+		
+		
+				Ray r = Ray(lightVec, s.cam.position+hit.getHit()*(-s.cam.w));
+				Hitpoint shadow = getHitPoint(r, &s);
+				if(shadow.getHit()>=0&&shadow.getHit()<10000){
+					pixelColor=pixelColor+specularColor;
+				}
+				Vector3 toBounce = (s.cam.position+hit.getHit()*(-s.cam.w))-s.cam.position;
+				Vector3 negNorm = -hit.getNorm();
+				Vector3 bounce = -2*(toBounce.dot(negNorm))*negNorm + toBounce;
+
+				Hitpoint reflection = getHitPoint(Ray(bounce,(s.cam.position+hit.getHit()*(-s.cam.w))), &s);
+				if(reflection.getHit()>=0&&reflection.getHit()<10000){
+					Material mmm = s.mats[hit.getMatid()];
+					pixelColor=(Vector3(1,1,1)-m.reflect)*pixelColor+mmm.getIa()*m.reflect;
+					}
 			}
+			float sceneSpecificScale = 10.0f;
+			//pixelColor=m.ia+(hit.getNorm().dot(s.lights[1]-hit.getHit())*m.id*s.lightMats[1].getId()+m.is*s.lightMats[1].getIs()*hit.getNorm().dot(s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w))));
+			pixelColor=pixelColor*sceneSpecificScale;
+			charColor = Color(pixelColor[0],pixelColor[1],pixelColor[2]);
+		}
 	}
-	float sceneSpecificScale = 10.0f;
-	//pixelColor = (pixelColor+m.getIa()).normalize()*sceneSpecificScale;
-	//pixelColor=m.ia+(hit.getNorm().dot(s.lights[1]-hit.getHit())*m.id*s.lightMats[1].getId()+m.is*s.lightMats[1].getIs()*hit.getNorm().dot(s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w))));
-	pixelColor=pixelColor*sceneSpecificScale;
-	Color charColor = Color(pixelColor[0],pixelColor[1],pixelColor[2]);
 	return charColor;
 }
