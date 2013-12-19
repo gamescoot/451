@@ -48,8 +48,11 @@ int main(int argc, char **argv)
 		for(int x=0; x<RES; x++)
 		{
 			//for each ray
+			//getColor()
 			r = generator.getRay(x, y);
 			Color charColor = getColor(r,s);
+
+			//write color to buffer
 			b.at(x,y) = charColor;
 		}
 
@@ -61,6 +64,8 @@ Hitpoint getHitPoint(Ray r, Scene* s){
 	std::vector<Shape *> shapes = (*s).shapes;
 	Hitpoint hit = Hitpoint(shapes[0]->intersect(r), shapes[0]->getMatid(), shapes[0]->getNormal(r.getOrig()+r.getDir()*shapes[0]->intersect(r)));
 	float t = hit.getHit();
+
+	//for each object in scenelist
 	for( int sInd=1; sInd < shapes.size(); sInd++ ){
 		Shape * currentShape = shapes[sInd];
 		float newt = currentShape->intersect(r);
@@ -68,28 +73,28 @@ Hitpoint getHitPoint(Ray r, Scene* s){
 		Vector3 newNorm = currentShape->getNormal((r.getOrig()+r.getDir()*newt));
 		
 		Hitpoint newHit = Hitpoint(newt, newMatid, newNorm);
-
+		//test intersect closer
 		if( newt < t && newt > 0){
 			hit = newHit;
 			t = hit.getHit();
 		}
 	}
+	//return hit data
 	if( t >= 0 && t<10000){
 			return hit;
 	}
+	
 	return Hitpoint(-1, -2, Vector3(1,0,0));
 }
 Color getColor(Ray r, Scene s){
-	Vector3 d = r.getDir().normalize()*255.0;
-	//Get ray Color
-	Color charColor = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
-
 	int amountShapes = s.shapes.size();
 
 	if(amountShapes>0){
 		Hitpoint hit = getHitPoint(r,&s);
 		int hitMaterial = hit.getMatid();
 
+
+		//if hit
 		if(hitMaterial>=-1){
 			Material m = s.mats[hit.getMatid()];
 			//getRayColor()
@@ -129,8 +134,10 @@ Color getColor(Ray r, Scene s){
 			float sceneSpecificScale = 10.0f;
 			//pixelColor=m.ia+(hit.getNorm().dot(s.lights[1]-hit.getHit())*m.id*s.lightMats[1].getId()+m.is*s.lightMats[1].getIs()*hit.getNorm().dot(s.cam.position-(s.cam.position+hit.getHit()*(-s.cam.w))));
 			pixelColor=pixelColor*sceneSpecificScale;
-			charColor = Color(pixelColor[0],pixelColor[1],pixelColor[2]);
+			return Color(pixelColor[0],pixelColor[1],pixelColor[2]);
 		}
 	}
+	Vector3 d = r.getDir().normalize()*255.0;
+	Color charColor = Color( abs(d[0]), abs(d[1]), abs(d[2]) );
 	return charColor;
 }
