@@ -14,7 +14,7 @@
 #include "Hitpoint.h"
 #include <math.h>
 
-#define RES 100
+#define RES 200
 Hitpoint getHitPoint( Ray r, Scene* s );
 Color getColor( Ray r, Scene s );
 
@@ -164,20 +164,26 @@ Color getColor( Ray r, Scene s )
 
 				}
 
-				Vector3 toBounce = hitPoint - orig;
-				Vector3 bounce = ( toBounce.dot( hitNorm  ) * hitNorm * ( -2 ) + toBounce ).normalize();
+			}
 
-				Hitpoint reflection = getHitPoint( Ray( bounce, hitPoint ), &s );
+			//Vector that will bounce
+			Vector3 toBounce = hitPoint - orig;
+			//Reflected Vector
+			Vector3 bounce = ( toBounce.dot( hitNorm ) * hitNorm * ( -2 ) + toBounce );
+			//Hitpoint of what the reflected vector hits
+			Hitpoint reflection = getHitPoint( Ray( bounce, hitPoint ), &s );
 
-				if( reflection.getHit() >= 0 && reflection.getHit() < max ){
+			//if the vector hits anything
+			if( reflection.getHit() >= 0 && reflection.getHit() < max ){
 
-					Material reflectMat = s.mats[ reflection.getMatid() ];
-					Vector3 reflectIa = reflectMat.getIa();
-					double refAmount = m.reflect;
+				//get the material info of hit object
+				Material reflectMat = s.mats[ reflection.getMatid() ];
+				Vector3 reflectIa = reflectMat.getIa();
+				double refAmount = m.reflect;
 
-					pixelColor =  pixelColor * ( 1 - refAmount ) + reflectIa * refAmount;
+				//change the pixel color according to the reflection
+				pixelColor =  pixelColor * ( 1 - refAmount ) + reflectIa * refAmount;
 
-					}
 			}
 
 			pixelColor = pixelColor * sceneSpecificScale;
