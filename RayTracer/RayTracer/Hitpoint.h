@@ -7,24 +7,34 @@
 class Hitpoint
 {
 public:
+
 	Hitpoint(){}
+
 	Hitpoint( float loc, int mid, Vector3 n )
 	{
+
 		location = loc;
 		matid = mid;
 		norm = n;
+	
 	}
 
 	float getHit(){
+	
 		return location;
+	
 	}
 
 	int getMatid(){
+	
 		return matid;
+	
 	}
 
 	Vector3 getNorm(){
+	
 		return norm;
+	
 	}
 
 private:
@@ -34,6 +44,5 @@ private:
 	Vector3 norm;
 
 };
-
 
 #endif

@@ -6,62 +6,89 @@
 
 class Material
 {
+
 public:
+
 	Material(){}
-	~Material()
-	{
-	}
+	
+	~Material(){}
 
 	Color getKa(){
+	
 		return ka;
+	
 	}
 
 	Color getKs(){
+	
 		return ks;
+	
 	}
 
 	Color getKd(){
+	
 		return kd;
+	
 	}
 
 	double getReflect(){
+	
 		return reflect;
+	
 	}
 
 	double getTrans(){
+	
 		return trans;
+	
 	}
 
 	double getGlossy(){
+	
 		return glossy;
+	
 	}
 
 	double getShiny(){
+	
 		return shiny;
+	
 	}
 
 	double getRefract(){
+	
 		return refract;
+	
 	}
 
 	char * getTexture(){
+	
 		return texture;
+	
 	}
 
 	int getIdentification(){
+	
 		return ident;
+	
 	}
 
 	Vector3 getIa(){
+	
 		return ia;
+	
 	}
 
 	Vector3 getId(){
+	
 		return id;
+	
 	}
 
 	Vector3 getIs(){
+	
 		return is;
+	
 	}
 
 	Vector3 ia;
@@ -77,9 +104,11 @@ public:
 	double glossy;
 	double shiny;
 	double refract;
-	char texture[500];
-	int ident;
-};
 
+	char texture[500];
+
+	int ident;
+
+};
 
 #endif

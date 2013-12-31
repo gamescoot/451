@@ -11,8 +11,11 @@
 
 class Scene
 {
+
 public:
-	Scene( objLoader obj ){
+
+	Scene( objLoader obj )
+	{
 
 		shapes = std::vector<Shape*>();
 		mats = std::vector<Material>();
@@ -24,37 +27,55 @@ public:
 
 		cam = Camera( camPos, camLook, camUp );
 
-		if( obj.sphereList != NULL ){
-			for( int sInd = 0; sInd < obj.sphereCount; sInd++ ){
+		if( obj.sphereList != NULL )
+		{
+
+			for( int sInd = 0; sInd < obj.sphereCount; sInd++ )
+			{
 
 				obj_sphere *spheres = obj.sphereList[ sInd ];
 				Vector3 spherePos = toVector3( *obj.vertexList[ spheres->pos_index ] ); 
 				
 				float radius;
+
 				Vector3 rad = toVector3( *obj.normalList[ spheres->up_normal_index ] );
+				
 				radius = rad.length();
+				
 				int mid = spheres->material_index;
+				
 				Sphere* s = new Sphere( spherePos, radius, mid );
 				
 				shapes.push_back( s );
+
 			}
+
 		}
 
-		for( int tInd = 0; tInd < obj.faceCount; tInd++ ){
-				obj_face *triangles = obj.faceList[ tInd ];
+		for( int tInd = 0; tInd < obj.faceCount; tInd++ )
+		{
+		
+			obj_face *triangles = obj.faceList[ tInd ];
 
-				Vector3 triPos1 = toVector3( *obj.vertexList[ triangles->vertex_index[0] ] );
-				Vector3 triPos2 = toVector3( *obj.vertexList[ triangles->vertex_index[1] ] ); 
-				Vector3 triPos3 = toVector3( *obj.vertexList[ triangles->vertex_index[2] ] );
-				int mid = triangles->material_index;
-				Triangle* t = new Triangle( triPos1, triPos2, triPos3 , mid );
-				shapes.push_back( t );
+			Vector3 triPos1 = toVector3( *obj.vertexList[ triangles->vertex_index[0] ] );
+			Vector3 triPos2 = toVector3( *obj.vertexList[ triangles->vertex_index[1] ] ); 
+			Vector3 triPos3 = toVector3( *obj.vertexList[ triangles->vertex_index[2] ] );
+
+			int mid = triangles->material_index;
+
+			Triangle* t = new Triangle( triPos1, triPos2, triPos3 , mid );
+
+			shapes.push_back( t );
+
 		}
 
-		for( int i = 0; i < obj.materialCount; i++ ){
+		for( int i = 0; i < obj.materialCount; i++ )
+		{
+
 			obj_material * matLoad = obj.materialList[ i ];
 			
 			Material mtl = Material();
+
 			float kaRed = matLoad->amb[ 0 ];
 			float kaGreen = matLoad->amb[ 1 ];
 			float kaBlue = matLoad->amb[ 2 ];
@@ -94,20 +115,31 @@ public:
 
 		}
 
-		for( int m = 0; m < obj.lightPointCount; m++ ){
+		for( int m = 0; m < obj.lightPointCount; m++ )
+		{
+
 			obj_light_point light = *obj.lightPointList[m];
+
 			Vector3 plight = toVector3( *obj.vertexList[ light.pos_index ] );
 			Material lightMat = mats[ light.material_index ];
+
 			lights.push_back( plight );
 			lightMats.push_back( lightMat );
+
 		}
+
 	}
 
 	Scene(){}
+
 	std::vector<Material> lightMats;
 	std::vector<Vector3> lights;
-	std::vector<Shape*> shapes;
+
 	std::vector<Material> mats;
+	std::vector<Shape*> shapes;
+
 	Camera cam;
+
 };
+
 #endif
