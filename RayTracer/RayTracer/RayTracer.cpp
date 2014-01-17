@@ -14,7 +14,9 @@
 #include "Hitpoint.h"
 #include <math.h>
 
-#define RES 200
+
+#define RES 300
+#define MAXI 99999999
 Hitpoint getHitPoint( Ray r, Scene* s );
 Color getColor( Ray r, Scene s );
 
@@ -56,7 +58,7 @@ int main( int argc, char **argv )
 			//for each ray
 			//getColor()
 			r = generator.getRay( x, y );
-			
+
 			Color charColor = getColor( r, s );
 
 			//write color to buffer
@@ -73,7 +75,7 @@ int main( int argc, char **argv )
 
 Hitpoint getHitPoint( Ray r, Scene* s )
 {
-
+	int newMatid;
 	std::vector<Shape *> shapes = ( *s ).shapes;
 	Hitpoint hit;
 	float t;
@@ -85,12 +87,15 @@ Hitpoint getHitPoint( Ray r, Scene* s )
 
 		Shape * currentShape = shapes[ sInd ];
 		float newt = currentShape->intersect( r );
-		int newMatid = currentShape->getMatid();
+		newMatid = currentShape->getMatid();
 		Vector3 newNorm = currentShape->getNormal( origin + newt * dir );
 		
 		Hitpoint newHit = Hitpoint( newt, newMatid, newNorm );
+		
 		//test intersect closer
-		if( sInd == 0 || newt < t && newt > 0 ){
+		bool closestT = sInd == 0 || (newt < t && newt > 0) || t < 0;
+		if( closestT )
+		{
 
 			hit = newHit;
 			t = newt;
@@ -100,8 +105,10 @@ Hitpoint getHitPoint( Ray r, Scene* s )
 	}
 
 	//return hit data
-	if( t >= 0 && t < 10000 ){
-
+	bool didItHit =  t >= 0 && t < MAXI;
+	if( didItHit)
+	{
+			//printf("%d\n", hit.getMatid());
 			return hit;
 
 	}
@@ -112,28 +119,31 @@ Hitpoint getHitPoint( Ray r, Scene* s )
 Color getColor( Ray r, Scene s )
 {
 
-	Vector3 pixelColor = Vector3( 0, 0, 0 );
+	Vector3 pixelColor = Vector3( abs(r.getDir()[0]*255.0f), abs(r.getDir()[1]*255.0f), abs(r.getDir()[2]*255.0f) );
 	int amountShapes = s.shapes.size();
 
-	if( amountShapes > 0 ){
+	bool shapesExist = amountShapes > 0;
+	if( shapesExist ){
 
 		Hitpoint hit = getHitPoint( r, &s );
 		int hitMaterial = hit.getMatid();
 
 		//if hit
-		if(hitMaterial >= -1 ){
+		bool didItHit = hitMaterial > -1;
+
+		if( didItHit ){
+
+			pixelColor = Vector3(0,0,0);
 
 			Material m = s.mats[ hitMaterial ];
-			float sceneSpecificScale = 10;
+			float sceneSpecificScale = 13;
 
 			Vector3 orig = r.getOrig();
 			Vector3 dir = r.getDir();
 
 			float hitDist = hit.getHit();
-			Vector3 hitPoint = orig + hit.getHit() * dir;
+			Vector3 hitPoint = orig + hitDist * dir;
 			Vector3 hitNorm = hit.getNorm();
-
-			float max = 10000;
 
 			//getRayColor()
 			//write Color to buffer
@@ -141,9 +151,12 @@ Color getColor( Ray r, Scene s )
 
 				Material lmat = s.lightMats[i];
 				Vector3 lightPos = s.lights[i];
-				Vector3 lightVec = ( lightPos - hitPoint ).normalize();
+
+				Vector3 lightVec = ( lightPos - hitPoint + hitNorm / 1000 );
+				float lightLen = lightVec.length();
+				lightVec = lightVec.normalize();
 		
-				float cosine = lightVec.dot( hitNorm );
+				float cosine = hitNorm.dot( lightVec );
 				Vector3 look = ( hitPoint  - orig ).normalize();
 				Vector3 reflect = ( 2 * lightVec.dot( hitNorm ) ) * hitNorm - lightVec;
 				float halfVector = pow( ( look ).dot( reflect ), 2 );//m.getShiny() );
@@ -154,13 +167,15 @@ Color getColor( Ray r, Scene s )
 
 				pixelColor = pixelColor + ambientColor;
 		
-				Ray r = Ray( lightVec, hitPoint );
+				Ray r = Ray( lightVec, hitPoint + hitNorm / 1000 );
 				Hitpoint shadow = getHitPoint( r, &s );
 				float shadowDist = shadow.getHit();
 
-				if( !( shadowDist >= 0 && shadowDist < max ) ){
+				bool notInShadow = !( shadowDist > 0 && shadowDist < lightLen);
 
-					pixelColor = pixelColor + specularColor + diffuseColor;
+				if( notInShadow ){
+
+					pixelColor = pixelColor  + diffuseColor  + specularColor;
 
 				}
 
@@ -174,7 +189,8 @@ Color getColor( Ray r, Scene s )
 			Hitpoint reflection = getHitPoint( Ray( bounce, hitPoint ), &s );
 
 			//if the vector hits anything
-			if( reflection.getHit() >= 0 && reflection.getHit() < max ){
+			bool didReflHit = reflection.getHit() > 0 && reflection.getHit() < MAXI;
+			if( didReflHit ){
 
 				//get the material info of hit object
 				Material reflectMat = s.mats[ reflection.getMatid() ];
@@ -187,8 +203,9 @@ Color getColor( Ray r, Scene s )
 			}
 
 			pixelColor = pixelColor * sceneSpecificScale;
-
+			
 		}
+
 	}
 
 	//else is miss

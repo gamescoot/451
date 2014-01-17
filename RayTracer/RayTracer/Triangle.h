@@ -25,14 +25,17 @@ public:
 
 	virtual float intersect( Ray r ){
 
-		Vector3 dir = r.getDir().normalize();
+		Vector3 dir = r.getDir();
 		Vector3 orig = r.getOrig();
 		Vector3 norm = getNormal( Vector3( 0, 0, 0 ) );
 
 		float top = ( vertex1 - orig ).dot( norm );
 		float bottom = dir.dot( norm );
 		float intersectionParam = top / bottom;
-
+		/*
+		if( intersectionParam > 0) {
+			return intersectionParam;
+		}*/
 		if( intersectionParam < 0 )
 		{
 

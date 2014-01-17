@@ -8,7 +8,14 @@
 #include "Shape.h"
 #include "Sphere.h"
 #include "Triangle.h"
+void printVector( Vector3 v )
+{
 
+	printf( "%.2f,", v[0] );
+	printf( "%.2f,", v[1] );
+	printf( "%.2f\n  ", v[2] );
+
+}
 class Scene
 {
 
@@ -60,8 +67,14 @@ public:
 			Vector3 triPos1 = toVector3( *obj.vertexList[ triangles->vertex_index[0] ] );
 			Vector3 triPos2 = toVector3( *obj.vertexList[ triangles->vertex_index[1] ] ); 
 			Vector3 triPos3 = toVector3( *obj.vertexList[ triangles->vertex_index[2] ] );
+			//printf("triangle %d:\n", tInd);
+			printVector(triPos1);
+			printVector(triPos2);
+			printVector(triPos3);
+
 
 			int mid = triangles->material_index;
+			
 
 			Triangle* t = new Triangle( triPos1, triPos2, triPos3 , mid );
 

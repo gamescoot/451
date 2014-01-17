@@ -35,20 +35,23 @@ public:
 	float b = ( dir * 2 ).dot( orig - pos );
 
 	float c = ( orig - pos ).dot( orig - pos ) - ( radius * radius );
-	
-	if( ( b * b ) - 4 * ( a * c ) > 0 )
+	bool inter = ( b * b ) - 4 * ( a * c ) > 0;
+	if( inter )
 	{
 
 		t1 = ( -b + sqrt( ( b * b ) - 4 * ( a * c ) ) ) / 2 * a;
 
 		t2 = ( -b - sqrt( ( b * b ) - 4 * ( a * c ) ) ) / 2 * a;
 
-		if( t1 < t2 ){
+		bool t1Closer = t1 < t2;
+		bool t2Intersects = t2 >= 0;
+		if( t1Closer )
+		{
 
 			t = t1;
 
 		}
-		else if( t2 >= 0 )
+		else if( t2Intersects )
 		{
 
 			t = t2;

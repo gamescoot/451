@@ -33,7 +33,7 @@ public:
 				float u = - (int) width / 2 + ( x + 0.5 );
 				float v = - (int) height / 2 + ( y + 0.5 );
 
-				Vector3 dir = ( -0.6f * width * cam.w + u * cam.u + v * cam.v ).normalize();
+				Vector3 dir = ( -.5f * width * cam.w + u * cam.u + v * cam.v ).normalize();
 				Ray pixelRay = Ray( dir, cam.position );
 
 				r1.rayArray.push_back(pixelRay);
