@@ -37,6 +37,24 @@ public:
 	
 	}
 
+	void setHit( float loc ){
+	
+		location = loc;
+	
+	}
+
+	void setMatid( int mid ){
+	
+		matid = mid;
+	
+	}
+
+	void setNorm( Vector3 n ){
+	
+		norm = n;
+	
+	}
+
 private:
 
 	float location;

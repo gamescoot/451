@@ -62,8 +62,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Tree.h" />
     <ClInclude Include="GenVector.h" />
     <ClInclude Include="Hitpoint.h" />
     <ClInclude Include="list.h" />

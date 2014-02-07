@@ -2,6 +2,7 @@
 #define __Ray
 
 #include "GenVector.h"
+#include "GenVector.h"
 
 class Ray
 {
@@ -29,7 +30,8 @@ public:
 		return origin;
 	
 	}
-
+	int mid;
+	Vector3 norm;
 private:
 
 	Vector3 direction;

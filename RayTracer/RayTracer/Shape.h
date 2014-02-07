@@ -4,6 +4,7 @@
 #include "GenVector.h"
 #include "Ray.h"
 
+
 class Shape
 {
 
@@ -18,6 +19,8 @@ public:
 	virtual Vector3 getNormal( Vector3 p ) = 0;
 
 	virtual int getMatid() = 0;
+
+	virtual Shape* getBB() = 0;
 
 private:
 

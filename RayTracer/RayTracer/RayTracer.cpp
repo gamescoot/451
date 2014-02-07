@@ -14,9 +14,9 @@
 #include "Hitpoint.h"
 #include <math.h>
 
-
 #define RES 300
-#define MAXI 99999999
+#define MAXI 99999
+
 Hitpoint getHitPoint( Ray r, Scene* s );
 Color getColor( Ray r, Scene s );
 
@@ -69,7 +69,7 @@ int main( int argc, char **argv )
 	}
 
 	//save image
-	simplePPM_write_ppm( "rainboj.ppm", b.getWidth(), b.getHeight(), ( unsigned char* ) &b.at( 0, 0 ) );
+	simplePPM_write_ppm( "output.ppm", b.getWidth(), b.getHeight(), ( unsigned char* ) &b.at( 0, 0 ) );
 
 }
 
@@ -77,51 +77,20 @@ Hitpoint getHitPoint( Ray r, Scene* s )
 {
 	int newMatid;
 	std::vector<Shape *> shapes = ( *s ).shapes;
+	TreeNode* root = s->root;
 	Hitpoint hit;
-	float t;
-	Vector3 origin = r.getOrig();
-	Vector3 dir = r.getDir();
-
-	//for each object in scenelist
-	for( int sInd=0; sInd < shapes.size(); sInd++ ){
-
-		Shape * currentShape = shapes[ sInd ];
-		float newt = currentShape->intersect( r );
-		newMatid = currentShape->getMatid();
-		Vector3 newNorm = currentShape->getNormal( origin + newt * dir );
-		
-		Hitpoint newHit = Hitpoint( newt, newMatid, newNorm );
-		
-		//test intersect closer
-		bool closestT = sInd == 0 || (newt < t && newt > 0) || t < 0;
-		if( closestT )
-		{
-
-			hit = newHit;
-			t = newt;
-
-		}
-
-	}
-
-	//return hit data
-	bool didItHit =  t >= 0 && t < MAXI;
-	if( didItHit)
-	{
+	float t = traverseSceneTree(root, r);
+	hit.setHit(t);
+	hit.setMatid(r.mid);
+	hit.setNorm(r.norm);
 			//printf("%d\n", hit.getMatid());
-			return hit;
-
-	}
-	
-	return Hitpoint( -1, -2, Vector3( 1, 0, 0 ) );
+	return hit;
 }
 
-Color getColor( Ray r, Scene s )
-{
+Color getColor( Ray r, Scene s ){
 
 	Vector3 pixelColor = Vector3( abs(r.getDir()[0]*255.0f), abs(r.getDir()[1]*255.0f), abs(r.getDir()[2]*255.0f) );
 	int amountShapes = s.shapes.size();
-
 	bool shapesExist = amountShapes > 0;
 	if( shapesExist ){
 
@@ -129,14 +98,14 @@ Color getColor( Ray r, Scene s )
 		int hitMaterial = hit.getMatid();
 
 		//if hit
-		bool didItHit = hitMaterial > -1;
+		bool didItHit = hit.getHit()!=-1;
 
 		if( didItHit ){
 
 			pixelColor = Vector3(0,0,0);
-
-			Material m = s.mats[ hitMaterial ];
-			float sceneSpecificScale = 13;
+			
+			Material m = s.mats[ 1 ];//hitMaterial ];
+			float sceneSpecificScale = 50;
 
 			Vector3 orig = r.getOrig();
 			Vector3 dir = r.getDir();
@@ -205,8 +174,8 @@ Color getColor( Ray r, Scene s )
 			pixelColor = pixelColor * sceneSpecificScale;
 			
 		}
-
 	}
+
 
 	//else is miss
 	//return background color

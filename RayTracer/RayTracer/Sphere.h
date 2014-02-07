@@ -4,6 +4,8 @@
 #include "GenVector.h"
 #include "Ray.h"
 #include "Shape.h"
+#include "AABB.h"
+#include <vector>
 
 class Sphere : public Shape{
 
@@ -67,6 +69,13 @@ public:
 	virtual Vector3 getNormal( Vector3 p ){ return ( p - pos ) / radius ; }
 
 	virtual int getMatid(){ return matid; }
+
+	virtual Shape* getBB()
+	{ 
+		std::vector<Shape*> list;
+		list.push_back(this);
+		return &AABB( pos-radius, pos+radius, matid, list ); 
+	}
 
 private:
 

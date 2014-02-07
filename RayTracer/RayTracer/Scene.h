@@ -8,14 +8,31 @@
 #include "Shape.h"
 #include "Sphere.h"
 #include "Triangle.h"
-void printVector( Vector3 v )
-{
+#include "AABB.h"
+#include "Tree.h"
 
-	printf( "%.2f,", v[0] );
-	printf( "%.2f,", v[1] );
-	printf( "%.2f\n  ", v[2] );
+/*
+createSceneTree - create a BVH tree from an object list
+add all objects to BB
+find max dimension
+sort along max dimension
+split list into 2
+recurse createSceneTree on each half
+set node contents
+  parent BB
+  split details
+  left+right child
+return node
 
-}
+traverseSceneTree - intersect a ray against a BVH tree
+intersect root node
+if hit
+  recurse traverse left
+  recurse traverse right
+  return hit value
+else is miss
+  return miss value
+  */
 class Scene
 {
 
@@ -67,10 +84,10 @@ public:
 			Vector3 triPos1 = toVector3( *obj.vertexList[ triangles->vertex_index[0] ] );
 			Vector3 triPos2 = toVector3( *obj.vertexList[ triangles->vertex_index[1] ] ); 
 			Vector3 triPos3 = toVector3( *obj.vertexList[ triangles->vertex_index[2] ] );
-			//printf("triangle %d:\n", tInd);
+			/*printf("triangle %d:\n", tInd);
 			printVector(triPos1);
 			printVector(triPos2);
-			printVector(triPos3);
+			printVector(triPos3);*/
 
 
 			int mid = triangles->material_index;
@@ -140,10 +157,10 @@ public:
 			lightMats.push_back( lightMat );
 
 		}
-
+		root = constructTree(shapes);
 	}
 
-	Scene(){}
+	~Scene(){}
 
 	std::vector<Material> lightMats;
 	std::vector<Vector3> lights;
@@ -151,6 +168,8 @@ public:
 	std::vector<Material> mats;
 	std::vector<Shape*> shapes;
 
+	TreeNode* root;
+	int max;
 	Camera cam;
 
 };

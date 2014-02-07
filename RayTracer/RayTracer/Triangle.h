@@ -6,6 +6,7 @@
 #include "Material.h"
 #include "Ray.h"
 #include "Shape.h"
+#include "AABB.h"
 #include <vector>
 
 class Triangle : public Shape{
@@ -73,6 +74,22 @@ public:
 	virtual Vector3 getNormal( Vector3 p ){return ( vertex1 - vertex3 ).cross( vertex2 - vertex1 ).normalize(); }
 	
 	virtual int getMatid(){return matid;}
+
+	virtual Shape* getBB()
+	{ 
+		
+		std::vector<Shape*> list;
+		list.push_back( this );
+		float minX = std::min(std::min(vertex1[0],vertex2[0]),vertex3[0]);
+		float minY = std::min(std::min(vertex1[1],vertex2[1]),vertex3[1]);
+		float minZ = std::min(std::min(vertex1[2],vertex2[2]),vertex3[2]);
+		float maxX = std::max(std::max(vertex1[0],vertex2[0]),vertex3[0]);
+		float maxY = std::max(std::max(vertex1[1],vertex2[1]),vertex3[1]);
+		float maxZ = std::max(std::max(vertex1[2],vertex2[2]),vertex3[2]);
+		Vector3 corn1 = Vector3( minX,minY,minZ);
+		Vector3 corn2 = Vector3( maxX,maxY,maxZ );
+		return &AABB( corn1, corn2, matid, list ); 
+	};
 	
 private:
 
